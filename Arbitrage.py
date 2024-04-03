@@ -1,32 +1,49 @@
-def get_amount_out(amount_in, reserve_in, reserve_out):
-    # Uniswap V2 的費率是0.3%，所以費後金額是997份
-    amount_in_with_fee = amount_in * 997
-    numerator = amount_in_with_fee * reserve_out
-    denominator = reserve_in * 1000 + amount_in_with_fee
-    amount_out = numerator / denominator
-    return amount_out
+from collections import deque
 
-# 定義流動性池
 liquidity = {
-    ("tokenB", "tokenA"): (10, 17), # tokenB to tokenA 的流動性
-    ("tokenA", "tokenD"): (15, 9),  # tokenA to tokenD 的流動性
-    ("tokenD", "tokenB"): (6, 13),  # tokenD to tokenB 的流動性
+    ("tokenA", "tokenB"): (17, 10),
+    ("tokenA", "tokenC"): (11, 7),
+    ("tokenA", "tokenD"): (15, 9),
+    ("tokenA", "tokenE"): (21, 5),
+    ("tokenB", "tokenC"): (36, 4),
+    ("tokenB", "tokenD"): (13, 6),
+    ("tokenB", "tokenE"): (25, 3),
+    ("tokenC", "tokenD"): (30, 12),
+    ("tokenC", "tokenE"): (10, 8),
+    ("tokenD", "tokenE"): (60, 25),
 }
 
-# 初始代幣及數量
-initial_amount = 5
+def get_amount_out(amount_in, reserve_in, reserve_out):
+    amount_in_with_fee = amount_in * 997.0
+    numerator = amount_in_with_fee * reserve_out
+    denominator = reserve_in * 1000.0 + amount_in_with_fee
+    return numerator / denominator
 
-# 交易路徑
-path = [
-    ("tokenB", "tokenA"),
-    ("tokenA", "tokenD"),
-    ("tokenD", "tokenB"),
-]
+def find_specific_path(liquidity):
+    target_path = ["tokenB", "tokenA", "tokenD", "tokenB"]
+    paths = deque([(["tokenB"], 5.0)])  # 初始化路徑和初始餘額
 
-# 按照路徑交易
-amount = initial_amount
-for (from_token, to_token) in path:
-    reserve_in, reserve_out = liquidity[(from_token, to_token)]
-    amount = get_amount_out(amount, reserve_in, reserve_out)
+    while paths:
+        path, balance = paths.popleft()
+        last_token = path[-1]
 
-print(f"Final path: {'->'.join([p[0] for p in path])}->{path[-1][1]}, tokenB balance={amount}")
+        # 尋找所有可能的下一步
+        for (tokenA, tokenB), (reserveA, reserveB) in liquidity.items():
+            if tokenA == last_token or tokenB == last_token:
+                next_token = tokenB if tokenA == last_token else tokenA
+                if next_token in path and next_token != "tokenB":
+                    continue  # 避免重複訪問非起始點的代幣
+
+                new_balance = get_amount_out(balance, reserveA if tokenA == last_token else reserveB, reserveB if tokenA == last_token else reserveA)
+                new_path = path + [next_token]
+
+                # 檢查是否為目標路徑
+                if new_path == target_path:
+                    return new_path, new_balance
+                elif next_token != "tokenB":
+                    paths.append((new_path, new_balance))
+
+    return [], 0.0  # 如果找不到目標路徑
+
+path, final_balance = find_specific_path(liquidity)
+print(f"Path: {'->'.join(path)}, tokenB balance={final_balance}")
