@@ -39,7 +39,24 @@ function swapTokens(uint amountIn, uint minAmountOut, address[] path, uint deadl
 ## Problem 3
 Please examine the mint function in the UniswapV2Pair contract. Upon initial liquidity minting, a minimum liquidity is subtracted. What is the rationale behind this design?
 
-> Solution
+> The Uniswap V2 protocol, when minting initial liquidity for a new pair, subtracts a minimum liquidity amount of 1000 units. This design serves several purposes, both technical and economic:
+
+> 1. Preventing Zero-Total-Supply Issues
+At the very start, before any liquidity is added, the total supply of the liquidity tokens (LP tokens) for a pair is zero. The first liquidity provider must not be allowed to end up with zero LP tokens after their contribution because their share of the pool would be undefined, and it could introduce division by zero errors in calculations. Subtracting a minimum amount when the first liquidity is added ensures that the first liquidity provider receives an amount of LP tokens that correctly represents their share of the pool, excluding the very small amount subtracted.
+> 
+> 2. Creating a Non-withdrawable Minimum Liquidity
+The minimum liquidity subtracted and permanently locked in the contract ensures that there's always some residual value. This makes the pool resistant to being completely drained through withdrawals. It's a safeguard that ensures the pool can continue to function, even if liquidity levels fall very low.
+> 
+> 3. Protection Against Certain Attacks
+This design can offer protection against potential manipulation or attack vectors. By ensuring that a tiny portion of liquidity cannot be withdrawn, it prevents someone from completely resetting the pool's state through strategic withdrawals and deposits, which could potentially be used to manipulate prices or extract value from other liquidity providers.
+> 
+>  Technical Rationale
+When the first liquidity provider contributes liquidity, they set the initial price of the assets in the pool based on the ratio of their deposited assets. The initial mint function needs to carefully issue LP tokens to ensure that the pool's initial state and the LP tokens' distribution accurately reflect the value contributed by this liquidity provider, minus the tiny, non-withdrawable part that serves the purposes outlined above.
+> 
+>  Example from the UniswapV2Pair Contract:
+When the first liquidity provider adds liquidity, the Uniswap V2 contract mints LP tokens based on the square root of the product of the amounts of the two assets deposited, minus the 1000 units of minimum liquidity. This approach ensures that the ratio of assets in the pool accurately reflects the market's consensus value of these assets relative to each other, while also seeding the pool with an initial amount of liquidity that remains locked.
+> 
+In summary, subtracting a minimum liquidity amount upon the initial liquidity minting in Uniswap V2 serves to prevent mathematical issues, ensure ongoing pool operation, protect against certain types of economic attacks, and establish an initial state that accurately reflects the value and price ratios contributed by the first liquidity provider.
 
 ## Problem 4
 Investigate the minting function in the UniswapV2Pair contract. When depositing tokens (not for the first time), liquidity can only be obtained using a specific formula. What is the intention behind this?
