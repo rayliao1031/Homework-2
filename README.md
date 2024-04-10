@@ -18,7 +18,23 @@ Provide your profitable path, the amountIn, amountOut value for each swap, and y
 ## Problem 2
 What is slippage in AMM, and how does Uniswap V2 address this issue? Please illustrate with a function as an example.
 
-> Solution
+> Slippage in AMMs like Uniswap V2 refers to the difference between the expected price of a trade and the price at which the trade is executed. This often occurs due to price movements between the time a trade is submitted and when it's executed, especially in volatile or low-liquidity markets.
+>
+>Uniswap V2 addresses slippage by:
+>
+>Using the Constant Product Formula (x * y = k), which naturally increases the price impact of larger trades, discouraging large orders that can cause significant slippage.
+> 
+>Allowing users to set a Slippage Tolerance, which is the maximum allowed deviation between the expected and actual prices. Trades exceeding this tolerance will fail.
+> 
+>Permitting a Transaction Deadline, where trades must be executed before this time, reducing the risk of executing at an undesirable price due to delay.
+```solidity
+// Assuming a function to swap tokens with slippage control
+function swapTokens(uint amountIn, uint minAmountOut, address[] path, uint deadline) external {
+    require(block.timestamp <= deadline, "Trade expired"); // Checks the deadline
+    uint amountOut = getAmountOut(amountIn, path); // Calculates output based on Uniswap formula
+    require(amountOut >= minAmountOut, "Slippage too high"); // Checks for slippage tolerance
+    // Proceed with the swap if conditions are met
+}
 
 ## Problem 3
 Please examine the mint function in the UniswapV2Pair contract. Upon initial liquidity minting, a minimum liquidity is subtracted. What is the rationale behind this design?
