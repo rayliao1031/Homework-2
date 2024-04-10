@@ -76,5 +76,5 @@ Investigate the minting function in the UniswapV2Pair contract. When depositing 
 ## Problem 5
 What is a sandwich attack, and how might it impact you when initiating a swap?
 
-> Solution
+> A sandwich attack is a manipulation technique in decentralized finance (DeFi), where an attacker exploits a user's pending swap transaction on an Automated Market Maker (AMM) like Uniswap. The attacker places orders around the user's transaction to profit from induced price changes. This results in the user receiving a worse price for their swap due to artificial slippage, often leading to financial losses. To mitigate such attacks, users can set lower slippage tolerances, use limit orders, or employ private transactions to conceal their intended trades.
 
