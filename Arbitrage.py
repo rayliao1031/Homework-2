@@ -19,8 +19,7 @@ def get_amount_out(amount_in, reserve_in, reserve_out):
     denominator = reserve_in * 1000.0 + amount_in_with_fee
     return numerator / denominator
 
-def find_specific_path(liquidity):
-    target_path = ["tokenB", "tokenA", "tokenD", "tokenB"]
+def find_arbitrage_path(liquidity):
     paths = deque([(["tokenB"], 5.0)])  # 初始化路徑和初始餘額
 
     while paths:
@@ -37,13 +36,13 @@ def find_specific_path(liquidity):
                 new_balance = get_amount_out(balance, reserveA if tokenA == last_token else reserveB, reserveB if tokenA == last_token else reserveA)
                 new_path = path + [next_token]
 
-                # 檢查是否為目標路徑
-                if new_path == target_path:
+                # 如果回到了tokenB且餘額大於20，立即返回這條路徑
+                if next_token == "tokenB" and len(new_path) > 3 and new_balance > 20.0:
                     return new_path, new_balance
                 elif next_token != "tokenB":
                     paths.append((new_path, new_balance))
 
-    return [], 0.0  # 如果找不到目標路徑
+    return [], 0.0  # 如果找不到符合條件的路徑
 
-path, final_balance = find_specific_path(liquidity)
-print(f"Path: {'->'.join(path)}, tokenB balance={final_balance}")
+path, balance = find_arbitrage_path(liquidity)
+print(f"Path: {'->'.join(path)}, tokenB balance={balance}")
