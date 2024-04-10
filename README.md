@@ -56,12 +56,22 @@ When the first liquidity provider contributes liquidity, they set the initial pr
 >  Example from the UniswapV2Pair Contract:
 When the first liquidity provider adds liquidity, the Uniswap V2 contract mints LP tokens based on the square root of the product of the amounts of the two assets deposited, minus the 1000 units of minimum liquidity. This approach ensures that the ratio of assets in the pool accurately reflects the market's consensus value of these assets relative to each other, while also seeding the pool with an initial amount of liquidity that remains locked.
 > 
-In summary, subtracting a minimum liquidity amount upon the initial liquidity minting in Uniswap V2 serves to prevent mathematical issues, ensure ongoing pool operation, protect against certain types of economic attacks, and establish an initial state that accurately reflects the value and price ratios contributed by the first liquidity provider.
+> In summary, subtracting a minimum liquidity amount upon the initial liquidity minting in Uniswap V2 serves to prevent mathematical issues, ensure ongoing pool operation, protect against certain types of economic attacks, and establish an initial state that accurately reflects the value and price ratios contributed by the first liquidity provider.
 
 ## Problem 4
 Investigate the minting function in the UniswapV2Pair contract. When depositing tokens (not for the first time), liquidity can only be obtained using a specific formula. What is the intention behind this?
 
-> Solution
+> In Uniswap V2, when depositing tokens after the initial liquidity provision, the minted liquidity is calculated using a specific formula to:
+
+> 1. **Ensure fairness**: It guarantees that new liquidity providers receive liquidity tokens in a fair manner, proportional to their contribution relative to the pool's size.
+>    
+> 2. **Maintain constant product**: The formula ensures that the addition of new liquidity does not disrupt the pool's constant product relationship (\(x * y = k\)), which is central to Uniswap's pricing algorithm.
+>    
+> 3. **Prevent imbalance**: It encourages liquidity providers to add liquidity in proportion to the existing token ratios in the pool, avoiding imbalances.
+> 
+> 4. **Incentivize pool balance**: When market prices shift, this mechanism motivates liquidity providers to add liquidity in a way that helps maintain the balance of the pool.
+> 
+>In short, this design ensures the equitable distribution of liquidity, upholds Uniswap's core market mechanism, and encourages healthy and balanced growth of liquidity.
 
 ## Problem 5
 What is a sandwich attack, and how might it impact you when initiating a swap?
