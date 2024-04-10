@@ -35,7 +35,7 @@ function swapTokens(uint amountIn, uint minAmountOut, address[] path, uint deadl
     require(amountOut >= minAmountOut, "Slippage too high"); // Checks for slippage tolerance
     // Proceed with the swap if conditions are met
 }
-
+```
 ## Problem 3
 Please examine the mint function in the UniswapV2Pair contract. Upon initial liquidity minting, a minimum liquidity is subtracted. What is the rationale behind this design?
 
