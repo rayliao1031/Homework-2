@@ -67,38 +67,39 @@ contract Arbitrage is Test {
         vm.stopPrank();
     }
 
+    function testHack() public pure {
+        console2.log("Happy Hacking!");
+    }
+
     function testExploit() public {
         vm.startPrank(arbitrager);
         uint256 tokensBefore = tokenB.balanceOf(arbitrager);
         console.log("Before Arbitrage tokenB Balance: %s", tokensBefore);
-
-        // 假设的套利路径: tokenB -> tokenA -> tokenD -> tokenB
-        address[] memory path = new address[](3);
+        tokenB.approve(address(router), 5 ether);
+        /**
+         * Please add your solution below
+         */
+        /**
+         * Please add your solution above
+         */
+        address[] memory path = new address[](5);
         path[0] = address(tokenB);
         path[1] = address(tokenA);
         path[2] = address(tokenD);
+        path[3] = address(tokenC);
+        path[4] = address(tokenB);
 
-        // 授权路由器合约使用tokenB
-        tokenB.approve(address(router), tokensBefore);
-
-        // 执行交易: tokenB -> tokenA
+        // 执行交易
         router.swapExactTokensForTokens(
-            tokensBefore,
-            0,
-            path,
-            address(this),
-            block.timestamp + 120
+            5 ether, // 使用的tokenB数量
+            0,       // 接受的最小tokenB数量，根据实际情况调整
+            path,    // 交换路径
+            arbitrager, // 接收最终代币的地址
+            block.timestamp + 300 // 交易的截止时间
         );
 
-        // 注意: 这里需要对每一步的交易重复执行相应的交易逻辑，包括可能需要的授权和路径调整
-
-        // 检查套利操作后的余额
         uint256 tokensAfter = tokenB.balanceOf(arbitrager);
-        console.log("After Arbitrage tokenB Balance: %s", tokensAfter);
-
-        // 断言最终余额是否满足条件
         assertGt(tokensAfter, 20 ether);
-
-        vm.stopPrank();
+        console.log("After Arbitrage tokenB Balance: %s", tokensAfter);
     }
 }
